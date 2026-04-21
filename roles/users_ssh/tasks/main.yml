@@ -1,0 +1,44 @@
+---
+- name: Create managed groups
+  ansible.builtin.group:
+    name: "{{ item.key }}"
+    gid: "{{ item.value.gid }}"
+    state: "{{ item.value.state | default('present') }}"
+  with_dict: "{{ managed_groups }}"
+
+- name: Create managed users
+  ansible.builtin.user:
+    name: "{{ item.key }}"
+    home: "{{ item.value.home | default(omit) }}"
+    uid: "{{ item.value.uid }}"
+    group: "{{ item.value.group | default(item.key) }}"
+    password: "{{ item.value.crypt_password | default(omit) }}"
+    groups: "{{ item.value.groups | default(omit) }}"
+    shell: "{{ item.value.shell | default(omit) }}"
+    create_home: "{{ item.value.create_home | default(True) }}"
+    move_home: true
+  with_dict: "{{ managed_users }}"
+
+- name: Add SSH authorized_keys for users
+  ansible.posix.authorized_key:
+    user: "{{ item.user }}"
+    key: "{{ item.key }}"
+    state: "{{ item.state | default('present') }}"
+    comment: "{{ item.comment | default(omit) }}"
+  with_items: "{{ managed_ssh_keys }}"
+
+- name: Manage SSH password authentication
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PasswordAuthentication'
+    line: "PasswordAuthentication {{ ssh_password_authentication | ternary('yes', 'no') }}"
+  when: manage_ssh_config | bool
+  notify: restart-sshd
+
+- name: Manage ssh public key authentication
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^#?PubkeyAuthentication'
+    line: "PubkeyAuthentication {{ ssh_pubkey_authentication | ternary('yes', 'no') }}"
+  when: manage_ssh_config | bool
+  notify: restart-sshd

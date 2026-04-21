@@ -1,0 +1,9 @@
+namespace: kaminski
+name: common
+version: 1.0.0
+readme: README.md
+authors:
+  - Nash Kaminski
+description: Shared Ansible roles for system updates and user management.
+license:
+  - MIT

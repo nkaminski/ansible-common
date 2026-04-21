@@ -1,0 +1,10 @@
+---
+# Default user and group configuration (Empty by default)
+managed_groups: {}
+managed_users: {}
+managed_ssh_keys: []
+
+# Default SSH hardening: Key-based only
+ssh_password_authentication: false
+ssh_pubkey_authentication: true
+manage_ssh_config: false

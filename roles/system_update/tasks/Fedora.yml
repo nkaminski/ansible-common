@@ -1,0 +1,10 @@
+---
+- name: Update all packages via dnf
+  ansible.builtin.dnf:
+    name: "*"
+    state: latest
+    update_cache: yes
+
+- name: Remove unused dependencies
+  ansible.builtin.dnf:
+    autoremove: yes
